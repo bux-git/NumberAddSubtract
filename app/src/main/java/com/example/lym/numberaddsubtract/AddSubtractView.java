@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+
 /**
  * @Description：
  * @author：Bux on 2017/11/15 15:55
@@ -142,16 +143,16 @@ public class AddSubtractView extends LinearLayout {
      * 校验数据，设置加减号是否可用 当达到最大或者最小时 按钮不可点击
      */
     private void checkDataSetView() {
+
+        mIvAdd.setEnabled(mCurrent <= mMax);
+        mIvSubtract.setEnabled(mCurrent >= mMin);
+
         if (mCurrent > mMax) {
-            mCurrent = mMin;
+            mCurrent = mMax;
         }
         if (mCurrent < mMin) {
             mCurrent = mMin;
         }
-
-        mIvAdd.setEnabled(mCurrent < mMax);
-        mIvSubtract.setEnabled(mCurrent > mMin);
-
         mTvSPNumber.setText(String.valueOf(mCurrent));
 
     }
@@ -160,20 +161,21 @@ public class AddSubtractView extends LinearLayout {
      * 检查数据　并通知数据变化
      */
     private void setControl() {
-        checkDataSetView();
         //最小时通知
-        if (mCurrent == mMin) {
+        if (mCurrent < mMin) {
             if (mListener != null) {
                 mListener.onLessMin();
             }
         }
         //最大值通知
-        if (mCurrent == mMax) {
+        if (mCurrent > mMax) {
             if (mListener != null) {
                 mListener.onMoreMax();
             }
 
         }
+
+        checkDataSetView();
         if (mListener != null) {
             mListener.onNumberChange(mCurrent);
         }

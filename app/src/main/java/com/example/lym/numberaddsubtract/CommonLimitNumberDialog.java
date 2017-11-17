@@ -69,7 +69,8 @@ public class CommonLimitNumberDialog extends Dialog implements
 
         mDialogView = getWindow().getDecorView().findViewById(
                 android.R.id.content);
-        mModalInAnim = (AnimationSet) AnimationUtils.loadAnimation(getContext(), R.anim.modal_in);
+        mModalInAnim = (AnimationSet) AnimationUtils.loadAnimation(
+                getContext(), R.anim.modal_in);
 
         confirmButt.setOnClickListener(this);
         cancelButt.setOnClickListener(this);
@@ -91,7 +92,7 @@ public class CommonLimitNumberDialog extends Dialog implements
             public void afterTextChanged(Editable s) {
                 mEtSPNumber.setSelection(s.length());
                 if (!TextUtils.isEmpty(s)) {
-                    checkNumber(Integer.parseInt(s.toString()));
+                    mCurrent = Integer.parseInt(s.toString());
                 }
             }
         });
@@ -111,7 +112,7 @@ public class CommonLimitNumberDialog extends Dialog implements
         Log.d(TAG, "onStart: ");
         mDialogView.startAnimation(mModalInAnim);
         //设置按钮状态
-        setControl(mCurrent);
+        checkNumber(mCurrent);
 
     }
 
@@ -224,12 +225,8 @@ public class CommonLimitNumberDialog extends Dialog implements
                     return;
                 }
                 int num = Integer.parseInt(result);
-                if (num < mMinNum) {
-                    setControl(num);
-                    mDialogListener.onLessMin();
-                } else if (num > mMaxNum) {
-                    setControl(num);
-                    mDialogListener.onMoreMax();
+                if (num < mMinNum || num > mMaxNum) {//检测输入框中数字
+                    checkNumber(num);
                 } else {
                     mDialogListener.onConfirmClick(num);
                     mEtSPNumber.setCursorVisible(false);//动态代码设置隐藏
@@ -245,11 +242,11 @@ public class CommonLimitNumberDialog extends Dialog implements
 
         } else if (v.getId() == R.id.b2b_add) {//加1
 
-            setControl(++mCurrent);
+            checkNumber(++mCurrent);
 
         } else if (v.getId() == R.id.b2b_subtract) {//减1
 
-            setControl(--mCurrent);
+            checkNumber(--mCurrent);
 
 
         }
@@ -262,29 +259,26 @@ public class CommonLimitNumberDialog extends Dialog implements
      * @param num
      */
     private void checkNumber(int num) {
-        if (num <= mMinNum) {
+
+        mIvSubtract.setEnabled(mCurrent >= mMinNum);
+        mIvAdd.setEnabled(mCurrent <= mMaxNum);
+
+        if (num < mMinNum) {
+            mDialogListener.onLessMin();
             mCurrent = mMinNum;
 
-        } else if (num >= mMaxNum) {
+        } else if (num > mMaxNum) {
+            mDialogListener.onMoreMax();
             mCurrent = mMaxNum;
 
         } else {
             mCurrent = num;
-
         }
-        mIvSubtract.setEnabled(mCurrent > mMinNum);
-        mIvAdd.setEnabled(mCurrent < mMaxNum);
-    }
 
-    /**
-     * 设置加减号是否可用 当达到最大或者最小时 按钮不可点击
-     *
-     * @param num 数量
-     */
-    private void setControl(int num) {
-        checkNumber(num);
         mEtSPNumber.setText(String.valueOf(mCurrent));
     }
+
+
 
     /**
      * 回调接口

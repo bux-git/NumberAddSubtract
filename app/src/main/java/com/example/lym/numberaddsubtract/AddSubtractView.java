@@ -19,7 +19,7 @@ public class AddSubtractView extends LinearLayout {
 
     ImageView mIvSubtract;//－号
     ImageView mIvAdd;//+
-    TextView mTvSPNumber;//输入数量
+    TextView mTvSPNumber;//输入众筹数量
 
     //最大值
     private int mMin = 0;
@@ -58,7 +58,8 @@ public class AddSubtractView extends LinearLayout {
         mIvSubtract.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setControl(--mCurrent);
+                --mCurrent;
+                setControl();
             }
         });
 
@@ -66,7 +67,8 @@ public class AddSubtractView extends LinearLayout {
 
             @Override
             public void onClick(View v) {
-                setControl(++mCurrent);
+                ++mCurrent;
+                setControl();
             }
         });
 
@@ -86,7 +88,8 @@ public class AddSubtractView extends LinearLayout {
 
                             @Override
                             public void onConfirmClick(int selectNum) {
-                                setControl(selectNum);
+                                mCurrent = selectNum;
+                                setControl();
                             }
 
                             @Override
@@ -95,6 +98,8 @@ public class AddSubtractView extends LinearLayout {
                             }
 
                             @Override
+
+
                             public void onMoreMax() {
                                 mListener.onMoreMax();
                             }
@@ -103,40 +108,72 @@ public class AddSubtractView extends LinearLayout {
         });
     }
 
+    public AddSubtractView setClickEnable(boolean enable) {
+        if(enable) {
+            checkDataSetView();
+            mTvSPNumber.setEnabled(true);
+
+        }else{
+            mIvAdd.setEnabled(false);
+            mIvSubtract.setEnabled(false);
+            mTvSPNumber.setEnabled(false);
+        }
+        return this;
+
+    }
+
+    /**
+     * 设置相关参数
+     *
+     * @param min
+     * @param max
+     * @param current
+     * @return
+     */
+    public AddSubtractView setLimit(int min, int max, int current) {
+        mMin = min;
+        mMax = max;
+        mCurrent = current;
+        checkDataSetView();
+        return this;
+    }
+
     /**
      * 校验数据，设置加减号是否可用 当达到最大或者最小时 按钮不可点击
-     *
-     * @param selectNum
      */
-    private void setControl(int selectNum) {
-
-        if (selectNum > mMax) {
-            selectNum = mMin;
+    private void checkDataSetView() {
+        if (mCurrent > mMax) {
+            mCurrent = mMin;
         }
-        if (selectNum < mMin) {
-            selectNum = mMin;
+        if (mCurrent < mMin) {
+            mCurrent = mMin;
         }
 
+        mIvAdd.setEnabled(mCurrent < mMax);
+        mIvSubtract.setEnabled(mCurrent > mMin);
+
+        mTvSPNumber.setText(String.valueOf(mCurrent));
+
+    }
+
+    /**
+     * 检查数据　并通知数据变化
+     */
+    private void setControl() {
+        checkDataSetView();
         //最小时通知
-        if (selectNum == mMin) {
+        if (mCurrent == mMin) {
             if (mListener != null) {
                 mListener.onLessMin();
             }
         }
         //最大值通知
-        if (selectNum == mMax) {
+        if (mCurrent == mMax) {
             if (mListener != null) {
                 mListener.onMoreMax();
             }
 
         }
-        mCurrent = selectNum;
-
-        mIvAdd.setEnabled(mCurrent < mMax);
-        mIvSubtract.setEnabled(mCurrent > mMin);
-
-
-        mTvSPNumber.setText(String.valueOf(mCurrent));
         if (mListener != null) {
             mListener.onNumberChange(mCurrent);
         }
@@ -155,15 +192,6 @@ public class AddSubtractView extends LinearLayout {
 
     public void setTvSPNumber(TextView tvSPNumber) {
         mTvSPNumber = tvSPNumber;
-    }
-
-
-    public AddSubtractView setLimit(int min, int max, int current) {
-        mMin = min;
-        mMax = max;
-        mCurrent = current;
-        setControl(current);
-        return this;
     }
 
 
